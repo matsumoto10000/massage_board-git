@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -38,9 +39,13 @@ public class IndexServlet extends HttpServlet {
         List<Message> messages = em.createNamedQuery("getAllMessages", Message.class)
                 .getResultList();
 
-        response.getWriter().append(Integer.valueOf(messages.size()).toString());
-        //EnriryManagerの利用を終了
         em.close();
+        //リクエストスコープにビューを渡す
+        request.setAttribute("messages", messages);
+        //index.jspを呼び出す
+        RequestDispatcher rd = request.getRequestDispatcher("WEB-INF/views/messages/index.jsp");
+        //フォワード先に処理をうつす
+        rd.forward(request, response);
     }
 
 }
