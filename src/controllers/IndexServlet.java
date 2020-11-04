@@ -35,13 +35,27 @@ public class IndexServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         EntityManager em = DBUtil.createEntityManager();
 
+        int page = 1;
+        try{
+            page = Integer.parseInt(request.getParameter("page"));
+        }catch(NumberFormatException e) {}
+
         //JPQLの文 getAllMessagesを引数にしてデータベースへの問い合わせを実行
+        //最大件数と開始一を指定してメッセージを取得
         List<Message> messages = em.createNamedQuery("getAllMessages", Message.class)
+                .setFirstResult(15 * (page -1))
+                .setMaxResults(15)
                 .getResultList();
+
+        //全件数を取得
+        long messages_count = (long)em.createNamedQuery("getMessagesCount",Long.class)
+                .getSingleResult();
 
         em.close();
         //リクエストスコープにビューを送る
         request.setAttribute("messages", messages);
+        request.setAttribute("messages_count", messages_count); //全件数
+        request.setAttribute("page", page);                     //ページ数
 
         //フラッシュメッセージがセッションスコープにセットされていたらリクエストスコープに保存する（セッションスコープからは削除）
         if(request.getSession().getAttribute("flush") != null){
