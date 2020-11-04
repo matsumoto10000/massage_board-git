@@ -40,8 +40,15 @@ public class IndexServlet extends HttpServlet {
                 .getResultList();
 
         em.close();
-        //リクエストスコープにビューを渡す
+        //リクエストスコープにビューを送る
         request.setAttribute("messages", messages);
+
+        //フラッシュメッセージがセッションスコープにセットされていたらリクエストスコープに保存する（セッションスコープからは削除）
+        if(request.getSession().getAttribute("flush") != null){
+            request.setAttribute("flush", request.getSession().getAttribute("flush"));
+            request.getSession().removeAttribute("flush");
+        }
+
         //index.jspを呼び出す
         RequestDispatcher rd = request.getRequestDispatcher("WEB-INF/views/messages/index.jsp");
         //フォワード先に処理をうつす
